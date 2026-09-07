@@ -69,7 +69,7 @@ export const TOOL_DECLARATIONS = [
     parameters: {
       type: "object",
       properties: {
-        category: S("Category slug: produce, dairy-bakery, pantry, snacks, personal-care, beauty, home, baby"),
+        category: S("Category slug: produce, dairy, pantry, snacks, personal, beauty, home, baby"),
         max_price: N("Maximum price in INR"),
         min_price: N("Minimum price in INR"),
         min_rating: N("Minimum rating out of 5"),

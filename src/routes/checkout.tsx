@@ -19,7 +19,7 @@ export const Route = createFileRoute("/checkout")({
 });
 
 function CheckoutPage() {
-  const { cartProducts, cartSubtotal, cartSavings, deliveryFee, cartTotal, clearCart } = useShop();
+  const { cartProducts, cartSubtotal, cartSavings, deliveryFee, cartTotal, clearCart, coupon, couponDiscount, removeCoupon, recordOrder } = useShop();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -48,8 +48,12 @@ function CheckoutPage() {
     setPlacing(true);
     const orderId = "ZN" + Math.random().toString(36).slice(2, 8).toUpperCase();
     const eta = Math.min(...cartProducts.map((p) => p.deliveryMin));
+    const items = cartProducts.reduce((n, p) => n + p.qty, 0);
+    const total = cartTotal;
     setTimeout(() => {
+      recordOrder({ id: orderId, total, items, eta, placedAt: new Date().toISOString(), status: "Confirmed — packing now" });
       clearCart();
+      removeCoupon();
       navigate({ to: "/order-confirmed", search: { id: orderId, eta } });
     }, 700);
   };
@@ -111,6 +115,7 @@ function CheckoutPage() {
             <dl className="mt-4 space-y-1.5 text-sm">
               <Row label="Subtotal" value={formatINR(cartSubtotal)} />
               {cartSavings > 0 && <Row label="Savings" value={`− ${formatINR(cartSavings)}`} success />}
+              {coupon && couponDiscount > 0 && <Row label={`Coupon ${coupon.code}`} value={`− ${formatINR(couponDiscount)}`} success />}
               <Row label="Delivery" value={deliveryFee === 0 ? "Free" : formatINR(deliveryFee)} />
               <div className="flex justify-between border-t border-border pt-2 text-base font-semibold text-ink"><dt>Total</dt><dd>{formatINR(cartTotal)}</dd></div>
             </dl>

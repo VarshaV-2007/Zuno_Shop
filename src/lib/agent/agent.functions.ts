@@ -3,10 +3,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { AGENT_SYSTEM_PROMPT, TOOL_DECLARATIONS } from "./tools";
 
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+export type JsonObject = { [key: string]: JsonValue };
+
 export type AgentPart =
   | { text: string }
-  | { functionCall: { name: string; args: Record<string, unknown> } }
-  | { functionResponse: { name: string; response: Record<string, unknown> } };
+  | { functionCall: { name: string; args: JsonObject } }
+  | { functionResponse: { name: string; response: JsonObject } };
 
 export type AgentTurn = { role: "user" | "model"; parts: AgentPart[] };
 
@@ -14,7 +17,7 @@ export type AgentDecision = {
   status: "act" | "done" | "error";
   message?: string;
   headline?: string;
-  calls: { name: string; args: Record<string, unknown> }[];
+  calls: { name: string; args: JsonObject }[];
 };
 
 const MODEL = "gemini-2.5-flash";
@@ -81,7 +84,7 @@ export const runAgentStep = createServerFn({ method: "POST" })
     const parts = json.candidates?.[0]?.content?.parts ?? [];
 
     const calls = parts
-      .filter((p): p is { functionCall: { name: string; args: Record<string, unknown> } } => "functionCall" in p)
+      .filter((p): p is { functionCall: { name: string; args: JsonObject } } => "functionCall" in p)
       .map((p) => ({ name: p.functionCall.name, args: p.functionCall.args ?? {} }));
     const text = parts
       .filter((p): p is { text: string } => "text" in p && typeof p.text === "string")
